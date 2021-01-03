@@ -9,12 +9,7 @@ class TestGroupTrades(unittest.TestCase):
         trades = temp.trades
 
         result = ibtaxde3.group_trades(trades)
-        for ta_group in result:
-            print(f"[OPEN] {ta_group.opening_transaction}")
-            for closing in ta_group.closing_transaction_items:
-                print(f"[CLOSE, nominal={closing.closed_nominal}] closing_ta={closing.transaction}")
-
-            print()
+        ibtaxde3.calc_profit(result)
 
         ibtaxde3.export_groups("groups.csv", result)
 

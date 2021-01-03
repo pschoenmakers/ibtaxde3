@@ -24,18 +24,23 @@ class TransactionGroup(object):
             assert amount >= 0
             return Decimal(copysign(abs(value) - amount, value))
 
-        if _same_sign(self.opening_transaction.nominal, transaction.nominal):
+        if _same_sign(self.opening_transaction.quantity, transaction.quantity):
             return None
 
-        nominal_to_close_abs = min(abs(self.opening_transaction.open_nominal), abs(transaction.open_nominal))
-        if nominal_to_close_abs == 0:
+        quantity_to_close = min(abs(self.opening_transaction.open_quantity), abs(transaction.open_quantity))
+        if quantity_to_close == 0:
             return None
 
-        self.opening_transaction.open_nominal = _reduce_abs(self.opening_transaction.open_nominal, nominal_to_close_abs)
-        transaction.open_nominal = _reduce_abs(transaction.open_nominal, nominal_to_close_abs)
+        self.opening_transaction.open_quantity = _reduce_abs(self.opening_transaction.open_quantity, quantity_to_close)
+        transaction.open_quantity = _reduce_abs(transaction.open_quantity, quantity_to_close)
 
-        ClosingTransactionItem = namedtuple("ClosingTransactionItem", "transaction closed_nominal")
-        cti = ClosingTransactionItem(transaction, copysign(nominal_to_close_abs, transaction.nominal))
+        class _ClosingTransactionItem(object):
+            def __init__(self, transaction, closed_quantity):
+                self.transaction = transaction
+                self.closed_quantity = closed_quantity
+                self.profit_eur = None
+
+        cti = _ClosingTransactionItem(transaction, quantity_to_close)
         self.closing_transaction_items.append(cti)
 
-        return nominal_to_close_abs
+        return quantity_to_close
