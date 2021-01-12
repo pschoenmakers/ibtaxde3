@@ -10,7 +10,7 @@ class TestGroupTrades(unittest.TestCase):
 
         groups = ibtaxde3.group_trades(trades)
         ibtaxde3.calc_profit(groups)
-        # ibtaxde3.export_groups("groups.csv", result)
+        ibtaxde3.export_groups("groups.csv", groups)
 
         inverted_groups = ibtaxde3._get_groups_close_first(groups)
         ibtaxde3.calc_profit(inverted_groups)

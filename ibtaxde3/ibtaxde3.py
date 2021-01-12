@@ -1,6 +1,7 @@
 import csv
 from decimal import Decimal
 from math import copysign
+from datetime import date as Date
 
 from finparser.parsers.ibflex_xml import parse_file
 from collections import namedtuple
@@ -143,14 +144,20 @@ def export_groups(filepath, groups):
             row = ["OPEN", "", o.transaction_id, o.date, o.settlement_date, o.category, o.currency, o.exchange_rate,
                    o.asset_category, o.symbol, o.isin, o.description, o.quantity, o.price, o.value, o.tax,
                    o.fee, o.value_eur, o.tax_eur, o.fee_eur, o.profit_eur]
-            writer.writerow(row)
+            writer.writerow(_to_german_format(row))
             for cti in group.closing_transaction_items:
                 c = cti.transaction
-                row = ["CLOSE", abs(cti.quantity), c.transaction_id, c.date, c.settlement_date, c.category,
+                row = ["CLOSE", abs(cti.closed_quantity), c.transaction_id, c.date, c.settlement_date, c.category,
                        c.currency, c.exchange_rate, c.asset_category, c.symbol, c.isin, c.description,
                        c.quantity, c.price, c.value, c.tax, c.fee, c.value_eur, c.tax_eur, c.fee_eur, cti.profit_eur]
-                writer.writerow(row)
+                writer.writerow(_to_german_format(row))
             writer.writerow([])
+
+
+def _to_german_format(row):
+    row = [(str(x.quantize(Decimal("1.000"))).replace(".", ",") if isinstance(x, Decimal) else x) for x in row]
+    row = [(f"{x.day:02d}.{x.month:02d}.{x.year:04d}" if isinstance(x, Date) else x) for x in row]
+    return row
 
 
 def export_groups_close_first(filepath, inverted_groups, groups=None):
@@ -171,14 +178,14 @@ def export_groups_close_first(filepath, inverted_groups, groups=None):
             row = ["CLOSE", "", c.transaction_id, c.date, c.settlement_date, c.category, c.currency, c.exchange_rate,
                    c.asset_category, c.symbol, c.isin, c.description, c.quantity, c.price, c.value, c.tax,
                    c.fee, c.value_eur, c.tax_eur, c.fee_eur, c.profit_eur]
-            writer.writerow(row)
+            writer.writerow(_to_german_format(row))
 
             for oti in group.opening_transaction_items:
                 o = oti.transaction
                 row = ["OPEN", abs(oti.quantity), o.transaction_id, o.date, o.settlement_date, o.category,
                        o.currency, o.exchange_rate, o.asset_category, o.symbol, o.isin, o.description,
                        o.quantity, o.price, o.value, o.tax, o.fee, o.value_eur, o.tax_eur, o.fee_eur, oti.profit_eur]
-                writer.writerow(row)
+                writer.writerow(_to_german_format(row))
             writer.writerow([])
 
         if groups is None:
@@ -190,7 +197,7 @@ def export_groups_close_first(filepath, inverted_groups, groups=None):
                 row = ["OPEN", "", o.transaction_id, o.date, o.settlement_date, o.category, o.currency,
                        o.exchange_rate, o.asset_category, o.symbol, o.isin, o.description, o.quantity, o.price,
                        o.value, o.tax, o.fee, o.value_eur, o.tax_eur, o.fee_eur, o.profit_eur]
-                writer.writerow(row)
+                writer.writerow(_to_german_format(row))
 
 
 def _get_groups_close_first(groups):

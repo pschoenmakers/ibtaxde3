@@ -128,3 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 /test/groups.csv
+/test/.~lock.groups.csv#
+/test/.~lock.inverted_groups.csv#
+/test/groups.csv
+/test/inverted_groups.csv
