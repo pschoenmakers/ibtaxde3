@@ -35,6 +35,7 @@ class TransactionGroup(object):
         remaining_quantity = self.quantity - quantity_to_close
         self.quantity = quantity_to_close
         self.closing_transaction = transaction
+        transaction.open_quantity -= quantity_to_close
 
         TryCloseResult = namedtuple("TryCloseResult", "closed_quantity remaining_open_quantity")
         return TryCloseResult(quantity_to_close, remaining_quantity)

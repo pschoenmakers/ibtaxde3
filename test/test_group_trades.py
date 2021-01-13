@@ -1,6 +1,7 @@
 import unittest
 
 from ibtaxde3 import ibtaxde3
+from ibtaxde3 import export
 
 
 class TestGroupTrades(unittest.TestCase):
@@ -9,12 +10,7 @@ class TestGroupTrades(unittest.TestCase):
         trades = temp.trades
 
         groups = ibtaxde3.group_trades(trades)
-        ibtaxde3.calc_profit(groups)
-        ibtaxde3.export_groups("groups.csv", groups)
-
-        inverted_groups = ibtaxde3._get_groups_close_first(groups)
-        ibtaxde3.calc_profit(inverted_groups)
-        ibtaxde3.export_groups_close_first("inverted_groups.csv", inverted_groups, groups)
+        export.export_groups_csv(groups, "new_groups.csv")
 
 
 if __name__ == '__main__':
