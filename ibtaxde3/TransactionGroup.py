@@ -25,6 +25,9 @@ class TransactionGroup(object):
             """ return True if both values have the same sign """
             return copysign(1, value1) == copysign(1, value2)
 
+        if self.closing_transaction is not None:
+            return None
+
         if _same_sign(self.opening_transaction.quantity, transaction.quantity):
             return None
 
