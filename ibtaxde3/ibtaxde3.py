@@ -59,7 +59,7 @@ def group_trades(trades):
 
 
 def _group_trades_symbol(trades):
-    trades.sort(key=lambda t: t.date)
+    trades.sort(key=lambda t: t.timestamp)
 
     groups = []
     for trade in trades:
@@ -90,3 +90,28 @@ def _group_trades_symbol(trades):
 
     return groups
 
+
+def group_trades_close_first(groups):
+    open_short_groups = [g for g in groups
+                         if g.closing_transaction is None
+                         and g.opening_transaction.category == "sell"]
+
+    for group in open_short_groups:
+        groups.remove(group)
+
+    closing_transaction_ids = set([g.closing_transaction.transaction_id for g in groups
+                                   if g.closing_transaction is not None])
+
+    closing_groups = []
+    for cta_id in closing_transaction_ids:
+        closing_group = [g for g in groups
+                         if g.closing_transaction is not None
+                         and g.closing_transaction.transaction_id == cta_id]
+
+        closing_groups.append(closing_group)
+
+    closing_groups.sort(key=lambda groups: (groups[0].closing_transaction.timestamp,
+                                            groups[0].closing_transaction.symbol))
+
+    GroupTradesCloseFirstResult = namedtuple("GroupTradesCloseFirstResult", "closing_groups open_short_groups")
+    return GroupTradesCloseFirstResult(closing_groups, open_short_groups)

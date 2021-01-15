@@ -10,7 +10,13 @@ class TestGroupTrades(unittest.TestCase):
         trades = temp.trades
 
         groups = ibtaxde3.group_trades(trades)
-        export.export_groups_csv(groups, "new_groups.csv")
+        groups = [g for g in groups
+                  if g.is_relevant_for_tax_year(2020)
+                  and g.opening_transaction.asset_category == "stock"]
+        # export.export_groups_csv(groups, "new_groups.csv")
+
+        closing_groups = ibtaxde3.group_trades_close_first(groups)
+        export.export_groups_close_first_csv(closing_groups, "new_groups2.csv")
 
 
 if __name__ == '__main__':

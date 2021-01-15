@@ -42,3 +42,31 @@ class TransactionGroup(object):
 
         TryCloseResult = namedtuple("TryCloseResult", "closed_quantity remaining_open_quantity")
         return TryCloseResult(quantity_to_close, remaining_quantity)
+
+    def calc_profit(self):
+        ota = self.opening_transaction
+        cta = self.closing_transaction
+
+        if ota.category == "sell":
+            open_profit = self.quantity / abs(ota.quantity) * (ota.value_eur + ota.fee_eur)
+            close_profit = (self.quantity / abs(cta.quantity) * (cta.value_eur + cta.fee_eur)
+                            if cta is not None else Decimal(0))
+        else:
+            assert ota.category == "buy"
+            open_profit = Decimal(0)
+            close_profit = ((self.quantity * (cta.price_eur - ota.price_eur)
+                             + self.quantity / abs(ota.quantity) * ota.fee_eur
+                             + self.quantity / abs(cta.quantity) * cta.fee_eur)
+                            if cta is not None else Decimal(0))
+
+        CalcProfitResult = namedtuple("CalcProfitResult", "open_profit close_profit")
+        return CalcProfitResult(open_profit, close_profit)
+
+    def is_relevant_for_tax_year(self, year):
+        if self.opening_transaction.date.year == year and self.opening_transaction.category == "sell":
+            return True
+
+        if self.closing_transaction is not None and self.closing_transaction.date.year == year:
+            return True
+
+        return False
