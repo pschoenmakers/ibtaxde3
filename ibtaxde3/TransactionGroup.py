@@ -22,7 +22,6 @@ class TransactionGroup(object):
         """ try to close the opening transaction. Return None if it is not possible or the still open quantity else """
 
         def _same_sign(value1, value2):
-            """ return True if both values have the same sign """
             return copysign(1, value1) == copysign(1, value2)
 
         if self.closing_transaction is not None:

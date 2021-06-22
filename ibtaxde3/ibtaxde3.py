@@ -43,7 +43,7 @@ def group_trades(trades):
 
     trades_by_symbol = dict()
     for trade in trades:
-        if trade.symbol[-1].islower():  # ib added a lower case letter to some foreign securities' symbols
+        if trade.symbol[-1].islower():  # ib added a lower case letter to some non-US securities' symbols
             symbol = trade.symbol[:-1]
             logger.warning(f"ignoring lower case suffix to symbol: {trade.symbol} -> {symbol}")
         else:
@@ -66,11 +66,13 @@ def _group_trades_symbol(trades):
         if trade.asset_category == "cash":  # skip currency exchange
             continue
 
+        # init groups if necessary
         if not groups:
             group = TransactionGroup(trade)
             groups.append(group)
             continue
 
+        # try to add trade to exisiting group
         trade.open_quantity = abs(trade.quantity)
         for group in groups:
             result = group.try_close(trade)
@@ -84,6 +86,7 @@ def _group_trades_symbol(trades):
             if trade.open_quantity == 0:
                 break
 
+        # trade doesn't fit into any existing group, create a new one
         else:
             new_group = TransactionGroup(trade, trade.open_quantity)
             groups.append(new_group)
